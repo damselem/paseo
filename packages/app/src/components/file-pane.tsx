@@ -28,7 +28,7 @@ import { persistAttachmentFromBytes } from "@/attachments/service";
 import { createPreviewAttachmentId, getFileNameFromPath } from "@/attachments/utils";
 import { explorerFileFromReadResult } from "@/file-explorer/read-result";
 import { resolveFilePreviewReadTarget } from "@/file-explorer/preview-target";
-import type { WorkspaceFileLocation } from "@/workspace/file-open";
+import type { WorkspaceFileTabTarget } from "@/workspace/file-open";
 
 interface CodeLineProps {
   tokens: HighlightToken[];
@@ -42,7 +42,7 @@ interface FilePreviewBodyProps {
   isLoading: boolean;
   showDesktopWebScrollbar: boolean;
   isMobile: boolean;
-  location: WorkspaceFileLocation;
+  location: WorkspaceFileTabTarget;
   imagePreviewUri: string | null;
 }
 
@@ -199,7 +199,10 @@ function FilePreviewBody({
   const markdownStyles = useMemo(() => createMarkdownStyles(theme), [theme]);
   const markdownParser = useMemo(() => MarkdownIt({ typographer: true, linkify: true }), []);
   const isMarkdownFile =
-    preview?.kind === "text" && isRenderedMarkdownFile(filePath) && !location.lineStart;
+    preview?.kind === "text" &&
+    isRenderedMarkdownFile(filePath) &&
+    !location.lineStart &&
+    location.renderMode !== "source";
 
   const previewScrollRef = useRef<RNScrollView>(null);
   const webScrollbarStyle = useWebScrollbarStyle();
@@ -391,7 +394,7 @@ export function FilePane({
 }: {
   serverId: string;
   workspaceRoot: string;
-  location: WorkspaceFileLocation;
+  location: WorkspaceFileTabTarget;
 }) {
   const isMobile = useIsCompactFormFactor();
   const showDesktopWebScrollbar = isWeb && !isMobile;

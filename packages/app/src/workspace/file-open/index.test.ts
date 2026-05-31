@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   createWorkspaceFileTabTarget,
   normalizeWorkspaceFileLocation,
+  normalizeWorkspaceFileRenderMode,
   workspaceFileLocationsEqual,
+  workspaceFileTabTargetsEqual,
 } from ".";
 
 describe("normalizeWorkspaceFileLocation", () => {
@@ -43,6 +45,28 @@ describe("workspace file tab targets", () => {
       kind: "file",
       path: "src/app.ts",
       lineStart: 12,
+      renderMode: "preview",
+    });
+  });
+
+  it("normalizes missing render mode to preview", () => {
+    expect(normalizeWorkspaceFileRenderMode(undefined)).toBe("preview");
+    expect(normalizeWorkspaceFileRenderMode("preview")).toBe("preview");
+    expect(normalizeWorkspaceFileRenderMode("source")).toBe("source");
+    expect(createWorkspaceFileTabTarget({ path: "README.md" })).toEqual({
+      kind: "file",
+      path: "README.md",
+      renderMode: "preview",
+    });
+    expect(createWorkspaceFileTabTarget({ path: "README.md", renderMode: "preview" })).toEqual({
+      kind: "file",
+      path: "README.md",
+      renderMode: "preview",
+    });
+    expect(createWorkspaceFileTabTarget({ path: "README.md", renderMode: "source" })).toEqual({
+      kind: "file",
+      path: "README.md",
+      renderMode: "source",
     });
   });
 
@@ -57,6 +81,21 @@ describe("workspace file tab targets", () => {
       workspaceFileLocationsEqual(
         { path: "src/app.ts", lineStart: 12 },
         { path: "src/app.ts", lineStart: 13 },
+      ),
+    ).toBe(false);
+  });
+
+  it("includes render mode in tab target equality", () => {
+    expect(
+      workspaceFileTabTargetsEqual(
+        { kind: "file", path: "README.md" },
+        { kind: "file", path: "README.md", renderMode: "preview" },
+      ),
+    ).toBe(true);
+    expect(
+      workspaceFileTabTargetsEqual(
+        { kind: "file", path: "README.md" },
+        { kind: "file", path: "README.md", renderMode: "source" },
       ),
     ).toBe(false);
   });

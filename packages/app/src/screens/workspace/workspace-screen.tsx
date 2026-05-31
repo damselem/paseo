@@ -20,6 +20,7 @@ import {
   ArrowLeftToLine,
   ArrowRightToLine,
   ChevronDown,
+  Code2,
   Copy,
   Ellipsis,
   EllipsisVertical,
@@ -197,6 +198,7 @@ const ThemedActivityIndicator = withUnistyles(ActivityIndicator);
 const ThemedEllipsis = withUnistyles(Ellipsis);
 const ThemedEllipsisVertical = withUnistyles(EllipsisVertical);
 const ThemedChevronDown = withUnistyles(ChevronDown);
+const ThemedCode2 = withUnistyles(Code2);
 const ThemedCopy = withUnistyles(Copy);
 const ThemedRotateCw = withUnistyles(RotateCw);
 const ThemedArrowLeftToLine = withUnistyles(ArrowLeftToLine);
@@ -319,6 +321,7 @@ interface MobileWorkspaceTabSwitcherProps {
   onCopyResumeCommand: (agentId: string) => Promise<void> | void;
   onCopyAgentId: (agentId: string) => Promise<void> | void;
   onReloadAgent: (agentId: string) => Promise<void> | void;
+  onToggleMarkdownSource: (tab: WorkspaceTabDescriptor) => void;
   onRenameTab: (tab: WorkspaceTabDescriptor) => void;
   onCloseTab: (tabId: string) => Promise<void> | void;
   onCloseTabsAbove: (tabId: string) => Promise<void> | void;
@@ -451,6 +454,8 @@ function MobileTabDropdownMenuItem({
     switch (entry.icon) {
       case "copy":
         return <ThemedCopy size={16} uniProps={mutedColorMapping} />;
+      case "code":
+        return <ThemedCode2 size={16} uniProps={mutedColorMapping} />;
       case "rotate-cw":
         return <ThemedRotateCw size={16} uniProps={mutedColorMapping} />;
       case "arrow-left-to-line":
@@ -498,6 +503,7 @@ function MobileWorkspaceTabOption({
   onCopyResumeCommand,
   onCopyAgentId,
   onReloadAgent,
+  onToggleMarkdownSource,
   onRenameTab,
   onCloseTab,
   onCloseTabsAbove,
@@ -515,6 +521,7 @@ function MobileWorkspaceTabOption({
   onCopyResumeCommand: (agentId: string) => Promise<void> | void;
   onCopyAgentId: (agentId: string) => Promise<void> | void;
   onReloadAgent: (agentId: string) => Promise<void> | void;
+  onToggleMarkdownSource: (tab: WorkspaceTabDescriptor) => void;
   onRenameTab: (tab: WorkspaceTabDescriptor) => void;
   onCloseTab: (tabId: string) => Promise<void> | void;
   onCloseTabsAbove: (tabId: string) => Promise<void> | void;
@@ -531,6 +538,7 @@ function MobileWorkspaceTabOption({
     onCopyResumeCommand,
     onCopyAgentId,
     onReloadAgent,
+    onToggleMarkdownSource,
     onRenameTab,
     onCloseTab,
     onCloseTabsBefore: onCloseTabsAbove,
@@ -586,6 +594,7 @@ const MobileWorkspaceTabSwitcher = memo(function MobileWorkspaceTabSwitcher({
   onCopyResumeCommand,
   onCopyAgentId,
   onReloadAgent,
+  onToggleMarkdownSource,
   onRenameTab,
   onCloseTab,
   onCloseTabsAbove,
@@ -640,6 +649,7 @@ const MobileWorkspaceTabSwitcher = memo(function MobileWorkspaceTabSwitcher({
           onCopyResumeCommand={onCopyResumeCommand}
           onCopyAgentId={onCopyAgentId}
           onReloadAgent={onReloadAgent}
+          onToggleMarkdownSource={onToggleMarkdownSource}
           onRenameTab={onRenameTab}
           onCloseTab={onCloseTab}
           onCloseTabsAbove={onCloseTabsAbove}
@@ -657,6 +667,7 @@ const MobileWorkspaceTabSwitcher = memo(function MobileWorkspaceTabSwitcher({
       onCopyResumeCommand,
       onCopyAgentId,
       onReloadAgent,
+      onToggleMarkdownSource,
       onRenameTab,
       onCloseTab,
       onCloseTabsAbove,
@@ -2522,6 +2533,20 @@ function WorkspaceScreenContent({
     [client, isConnected, normalizedServerId, toast],
   );
 
+  const handleToggleMarkdownSource = useCallback(
+    (tab: WorkspaceTabDescriptor) => {
+      if (!persistenceKey || tab.target.kind !== "file") {
+        return;
+      }
+      const nextRenderMode = tab.target.renderMode === "source" ? "preview" : "source";
+      retargetWorkspaceTab(persistenceKey, tab.tabId, {
+        ...tab.target,
+        renderMode: nextRenderMode,
+      });
+    },
+    [persistenceKey, retargetWorkspaceTab],
+  );
+
   const handleCopyWorkspacePath = useCallback(async () => {
     if (!workspaceDirectory) {
       toast.error("Workspace path not available");
@@ -3250,6 +3275,7 @@ function WorkspaceScreenContent({
         onCopyResumeCommand={handleCopyResumeCommand}
         onCopyAgentId={handleCopyAgentId}
         onReloadAgent={handleReloadAgent}
+        onToggleMarkdownSource={handleToggleMarkdownSource}
         onRenameTab={handleRenameTab}
         onCloseTabsToLeft={handleCloseTabsToLeftInPane}
         onCloseTabsToRight={handleCloseTabsToRightInPane}
@@ -3284,6 +3310,7 @@ function WorkspaceScreenContent({
     handleCopyResumeCommand,
     handleCopyAgentId,
     handleReloadAgent,
+    handleToggleMarkdownSource,
     handleRenameTab,
     handleCloseTabsToLeftInPane,
     handleCloseTabsToRightInPane,
@@ -3363,6 +3390,7 @@ function WorkspaceScreenContent({
           onCopyResumeCommand={handleCopyResumeCommand}
           onCopyAgentId={handleCopyAgentId}
           onReloadAgent={handleReloadAgent}
+          onToggleMarkdownSource={handleToggleMarkdownSource}
           onRenameTab={handleRenameTab}
           onCloseTab={handleCloseTabById}
           onCloseTabsAbove={handleCloseTabsToLeft}
@@ -3384,6 +3412,7 @@ function WorkspaceScreenContent({
           onCopyResumeCommand={handleCopyResumeCommand}
           onCopyAgentId={handleCopyAgentId}
           onReloadAgent={handleReloadAgent}
+          onToggleMarkdownSource={handleToggleMarkdownSource}
           onRenameTab={handleRenameTab}
           onCloseTabsToLeft={handleCloseTabsToLeft}
           onCloseTabsToRight={handleCloseTabsToRight}
